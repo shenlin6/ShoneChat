@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.35.2
 // 	protoc        v3.19.4
-// source: apps/user/rpc/user.proto
+// source: apps/user/rpcserver/user.proto
 
 package user
 

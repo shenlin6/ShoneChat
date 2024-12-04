@@ -1,9 +1,9 @@
-Name: user.rpc
+Name: user.rpcserver
 ListenOn: 0.0.0.0:10000
 Etcd:
   Hosts:
     - 192.168.117.24:3379
-  Key: user.rpc
+  Key: user.rpcserver
 
 Mysql:
   DataSource: root:easy-chat@tcp(192.168.117.24:13306)/shonechat ?charset=utf8mb4

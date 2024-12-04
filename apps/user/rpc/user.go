@@ -1,13 +1,13 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-
 	"ShoneChat/apps/user/rpc/internal/config"
 	"ShoneChat/apps/user/rpc/internal/server"
 	"ShoneChat/apps/user/rpc/internal/svc"
 	"ShoneChat/apps/user/rpc/user"
+	"ShoneChat/pkg/interceptor/rpcserver"
+	"flag"
+	"fmt"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -32,8 +32,9 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+	s.AddUnaryInterceptors(rpcserver.LogInterceptor)
 	defer s.Stop()
 
-	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
+	fmt.Printf("Starting rpcserver server at %s...\n", c.ListenOn)
 	s.Start()
 }

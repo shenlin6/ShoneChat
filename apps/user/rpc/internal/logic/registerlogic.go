@@ -5,9 +5,10 @@ import (
 	"ShoneChat/pkg/ctxdata"
 	"ShoneChat/pkg/encrypt"
 	"ShoneChat/pkg/wuid"
+	"ShoneChat/pkg/xerr"
 	"context"
 	"database/sql"
-	"errors"
+	"github.com/pkg/errors"
 	"time"
 
 	"ShoneChat/apps/user/rpc/internal/svc"
@@ -17,7 +18,7 @@ import (
 )
 
 var (
-	ErrPhoneIsRegister = errors.New("手机号已经注册过")
+	ErrPhoneIsRegister = xerr.New(xerr.SERVER_COMMON_ERROR, "手机号已经注册过了")
 )
 
 type RegisterLogic struct {
@@ -35,12 +36,11 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 }
 
 func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, error) {
-	// todo: add your logic here and delete this line
 
 	// 1. 验证用户是否注册，根据手机号码验证
 	userEntity, err := l.svcCtx.UsersModel.FindByPhone(l.ctx, in.Phone)
 	if err != nil && err != models.ErrNotFound {
-		return nil, err
+		return nil, errors.WithStack(ErrPhoneNotRegister)
 	}
 
 	if userEntity != nil {
@@ -61,7 +61,7 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, erro
 	if len(in.Password) > 0 {
 		genPassword, err := encrypt.GenPasswordHash([]byte(in.Password))
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(xerr.NewInternalErr(), "internal error,err %v", err)
 		}
 		userEntity.Password = sql.NullString{
 			String: string(genPassword),
@@ -71,7 +71,7 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, erro
 
 	_, err = l.svcCtx.UsersModel.Insert(l.ctx, userEntity)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(xerr.NewDBErr(), "insert userEntity err %v ", err)
 	}
 
 	// 生成token
@@ -79,7 +79,7 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, erro
 	token, err := ctxdata.GetJwtToken(l.svcCtx.Config.Jwt.AccessSecret, now, l.svcCtx.Config.Jwt.AccessExpire,
 		userEntity.Id)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(xerr.NewDBErr(), "ctxdata get jwt token err %v", err)
 	}
 
 	return &user.RegisterResp{

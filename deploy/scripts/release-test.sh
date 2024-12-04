@@ -1,5 +1,5 @@
 need_start_server_shell=(
-  # rpc
+  # rpcserver
   user-rpc-test.sh
   social-rpc-test.sh
 

@@ -2,8 +2,10 @@ package logic
 
 import (
 	"ShoneChat/apps/user/models"
+	"ShoneChat/pkg/xerr"
 	"context"
 	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 
 	"ShoneChat/apps/user/rpc/internal/svc"
 	"ShoneChat/apps/user/rpc/user"
@@ -44,7 +46,7 @@ func (l *FindUserLogic) FindUser(in *user.FindUserReq) (*user.FindUserResp, erro
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(xerr.NewDBErr(), "find user failed,err %v , req %v", err, in.Phone)
 	}
 
 	var resp []*user.UserEntity
@@ -53,6 +55,4 @@ func (l *FindUserLogic) FindUser(in *user.FindUserReq) (*user.FindUserResp, erro
 	return &user.FindUserResp{
 		User: resp,
 	}, nil
-
-	return &user.FindUserResp{}, nil
 }
