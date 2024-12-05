@@ -1,10 +1,12 @@
 package logic
 
 import (
-	"context"
-
 	"ShoneChat/apps/social/rpc/internal/svc"
 	"ShoneChat/apps/social/rpc/social"
+	"ShoneChat/pkg/xerr"
+	"context"
+	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +26,16 @@ func NewFriendListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Friend
 }
 
 func (l *FriendListLogic) FriendList(in *social.FriendListReq) (*social.FriendListResp, error) {
-	// todo: add your logic here and delete this line
+	friendsList, err := l.svcCtx.FriendsModel.ListByUserid(l.ctx, in.UserId)
+	if err != nil {
+		return nil, errors.Wrapf(xerr.NewDBErr(), "list friend by uid err %v req %v ", err,
+			in.UserId)
+	}
 
-	return &social.FriendListResp{}, nil
+	var respList []*social.Friends
+	copier.Copy(&respList, &friendsList)
+
+	return &social.FriendListResp{
+		List: respList,
+	}, nil
 }

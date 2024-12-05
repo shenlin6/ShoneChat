@@ -27,7 +27,10 @@ var (
 type (
 	friendsModel interface {
 		Insert(ctx context.Context, data *Friends) (sql.Result, error)
+		Inserts(ctx context.Context, session sqlx.Session, data ...*Friends) (sql.Result, error)
 		FindOne(ctx context.Context, id uint64) (*Friends, error)
+		FindByUidAndFid(ctx context.Context, uid, fid string) (*Friends, error)
+		ListByUserid(ctx context.Context, userId string) ([]*Friends, error)
 		Update(ctx context.Context, data *Friends) error
 		Delete(ctx context.Context, id uint64) error
 	}
@@ -80,6 +83,35 @@ func (m *defaultFriendsModel) FindOne(ctx context.Context, id uint64) (*Friends,
 	}
 }
 
+func (m *defaultFriendsModel) FindByUidAndFid(ctx context.Context, uid, fid string) (*Friends, error) {
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `friend_uid` = ?", friendsRows, m.table)
+
+	var resp Friends
+	// 不常有，不使用缓存
+	err := m.QueryRowNoCacheCtx(ctx, &resp, query, uid, fid)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
+func (m *defaultFriendsModel) ListByUserid(ctx context.Context, userId string) ([]*Friends, error) {
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? ", friendsRows, m.table)
+
+	var resp []*Friends
+	err := m.QueryRowsNoCacheCtx(ctx, &resp, query, userId)
+	switch err {
+	case nil:
+		return resp, nil
+	default:
+		return nil, err
+	}
+}
+
 func (m *defaultFriendsModel) Insert(ctx context.Context, data *Friends) (sql.Result, error) {
 	friendsIdKey := fmt.Sprintf("%s%v", cacheFriendsIdPrefix, data.Id)
 	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
@@ -87,6 +119,31 @@ func (m *defaultFriendsModel) Insert(ctx context.Context, data *Friends) (sql.Re
 		return conn.ExecCtx(ctx, query, data.UserId, data.FriendUid, data.Remark, data.AddSource)
 	}, friendsIdKey)
 	return ret, err
+}
+
+func (m *defaultFriendsModel) Inserts(ctx context.Context, session sqlx.Session, data ...*Friends) (sql.Result, error) {
+	var (
+		sql  strings.Builder
+		args []any
+	)
+
+	if len(data) == 0 {
+		return nil, nil
+	}
+
+	// insert into tablename values(数据), (数据)
+	sql.WriteString(fmt.Sprintf("insert into %s (%s) values ", m.table, friendsRowsExpectAutoSet))
+
+	for i, v := range data {
+		sql.WriteString("(?, ?, ?, ?, ?)")
+		args = append(args, v.UserId, v.FriendUid, v.Remark, v.AddSource, v.CreatedAt)
+		if i == len(data)-1 {
+			break
+		}
+		sql.WriteString(",")
+	}
+
+	return session.ExecCtx(ctx, sql.String(), args...)
 }
 
 func (m *defaultFriendsModel) Update(ctx context.Context, data *Friends) error {
