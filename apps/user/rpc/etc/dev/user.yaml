@@ -12,7 +12,7 @@ Mysql:
 Cache:
   - Host: 192.168.117.24:16379
     Type: node
-    Pass: easy-chat
+    Pass: shonechat
 
 Jwt:
   AccessSecret: shonechat
