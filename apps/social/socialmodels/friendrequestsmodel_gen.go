@@ -31,6 +31,7 @@ type (
 		Insert(ctx context.Context, data *FriendRequests) (sql.Result, error)
 		FindOne(ctx context.Context, id uint64) (*FriendRequests, error)
 		FindByReqUidAndUserId(ctx context.Context, rid, uid string) (*FriendRequests, error)
+		ListNoHandler(ctx context.Context, userId string) ([]*FriendRequests, error)
 		Update(ctx context.Context, session sqlx.Session, data *FriendRequests) error
 		Delete(ctx context.Context, id uint64) error
 	}
@@ -103,6 +104,20 @@ func (m *defaultFriendRequestsModel) FindByReqUidAndUserId(ctx context.Context, 
 		return &resp, nil
 	case sqlc.ErrNotFound:
 		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
+func (m *defaultFriendRequestsModel) ListNoHandler(ctx context.Context, userId string) ([]*FriendRequests, error) {
+	query := fmt.Sprintf("select %s from %s where `handle_result` = 1 and `user_id` = ?", friendRequestsRows, m.table)
+
+	var resp []*FriendRequests
+	err := m.QueryRowsNoCacheCtx(ctx, &resp, query, userId)
+
+	switch err {
+	case nil:
+		return resp, nil
 	default:
 		return nil, err
 	}

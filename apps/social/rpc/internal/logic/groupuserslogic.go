@@ -1,10 +1,12 @@
 package logic
 
 import (
-	"context"
-
 	"ShoneChat/apps/social/rpc/internal/svc"
 	"ShoneChat/apps/social/rpc/social"
+	"ShoneChat/pkg/xerr"
+	"context"
+	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +26,15 @@ func NewGroupUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupU
 }
 
 func (l *GroupUsersLogic) GroupUsers(in *social.GroupUsersReq) (*social.GroupUsersResp, error) {
-	// todo: add your logic here and delete this line
+	groupMembers, err := l.svcCtx.GroupMembersModel.ListByGroupId(l.ctx, in.GroupId)
+	if err != nil {
+		return nil, errors.Wrapf(xerr.NewDBErr(), "list group member err %v req %v", err, in.GroupId)
+	}
 
-	return &social.GroupUsersResp{}, nil
+	var respList []*social.GroupMembers
+	copier.Copy(&respList, &groupMembers)
+
+	return &social.GroupUsersResp{
+		List: respList,
+	}, nil
 }
