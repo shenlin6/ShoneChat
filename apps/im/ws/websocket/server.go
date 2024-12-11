@@ -60,6 +60,8 @@ func (s *Server) ServerWs(w http.ResponseWriter, r *http.Request) {
 	// 连接鉴权
 	if !s.authentication.Auth(w, r) {
 		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprint("当前不具备访问权限")))
+		conn.Close()
+		return
 	}
 
 	// 记录连接
