@@ -1,14 +1,26 @@
 package websocket
 
+type FrameType uint8
+
+const (
+	FrameData  FrameType = 0x0
+	FramePing  FrameType = 0x1
+	FrameAck   FrameType = 0x2
+	FrameNoAck FrameType = 0x3
+	FrameErr   FrameType = 0x9
+)
+
 type Message struct {
-	Method string      `json:"method"`
-	FormId string      `json:"formId"`
-	Data   interface{} `json:"data"` // map[string]interface{}
+	FrameType `json:"frameType"`
+	Method    string      `json:"method"`
+	FormId    string      `json:"formId"`
+	Data      interface{} `json:"data"` // map[string]interface{}
 }
 
 func NewMessage(formId string, data interface{}) *Message {
 	return &Message{
-		FormId: formId,
-		Data:   data,
+		FrameType: FrameData,
+		FormId:    formId,
+		Data:      data,
 	}
 }
