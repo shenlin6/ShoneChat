@@ -48,6 +48,23 @@ services:
     networks:
       ShoneChat:
 
+  mongo:
+    image: mongo:4.0
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: shonechat
+    ports:
+      - 47017:27017
+    volumes:
+      - ./components/mongo/data:/data/db
+      - /etc/localtime:/etc/localtime
+    restart: always
+    networks:
+      ShoneChat:
+
+
+
 networks:
   ShoneChat:
     driver: bridge

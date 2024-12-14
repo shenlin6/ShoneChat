@@ -1,2 +1,10 @@
 Name: im.ws
 ListenOn: 0.0.0.0:8004
+
+
+JwtAuth:
+  AccessSecret: shonechat
+
+Mongo:
+  Url: "mongodb://root:shonechat@192.168.117.24:47017"
+  Db: shonechat

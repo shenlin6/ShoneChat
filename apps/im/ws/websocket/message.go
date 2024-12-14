@@ -24,3 +24,10 @@ func NewMessage(formId string, data interface{}) *Message {
 		Data:      data,
 	}
 }
+
+func NewErrMessage(err error) *Message {
+	return &Message{
+		FrameType: FrameErr,
+		Data:      err.Error(),
+	}
+}
