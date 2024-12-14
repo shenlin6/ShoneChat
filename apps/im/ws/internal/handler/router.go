@@ -1,7 +1,8 @@
 package handler
 
 import (
-	"ShoneChat/apps/im/ws/internal/conversation"
+	"ShoneChat/apps/im/ws/internal/handler/conversation"
+	"ShoneChat/apps/im/ws/internal/handler/push"
 	"ShoneChat/apps/im/ws/internal/handler/user"
 	"ShoneChat/apps/im/ws/internal/svc"
 	"ShoneChat/apps/im/ws/websocket"
@@ -16,6 +17,10 @@ func RegisterHandlers(srv *websocket.Server, svc *svc.ServiceContext) {
 		{
 			Method:  "conversation.chat",
 			Handler: conversation.Chat(svc),
+		},
+		{
+			Method:  "push",
+			Handler: push.Push(svc),
 		},
 	})
 }

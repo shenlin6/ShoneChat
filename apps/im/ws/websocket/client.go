@@ -53,7 +53,7 @@ func (c *client) Send(v any) error {
 	if err == nil {
 		return nil
 	}
-	// todo: 再增加一个重连发送
+	//  增加一个重连发送
 	conn, err := c.dail()
 	if err != nil {
 		return err

@@ -1,12 +1,11 @@
 package conversation
 
 import (
-	"ShoneChat/apps/im/ws/internal/logic"
 	"ShoneChat/apps/im/ws/internal/svc"
 	"ShoneChat/apps/im/ws/websocket"
 	"ShoneChat/apps/im/ws/ws"
+	"ShoneChat/apps/task/mq/mq"
 	"ShoneChat/pkg/constant"
-	"context"
 	"github.com/mitchellh/mapstructure"
 	"time"
 )
@@ -21,20 +20,19 @@ func Chat(svc *svc.ServiceContext) websocket.HandlerFunc {
 
 		switch data.ChatType {
 		case constant.SingleChatType:
-			err := logic.NewConversation(context.Background(), srv, svc).SingleChat(&data, conn.Uid)
-			if err != nil {
-				srv.Send(websocket.NewErrMessage(err), conn)
-				return
-			}
-
-			srv.SendByUserId(websocket.NewMessage(conn.Uid, ws.Chat{
+			err := svc.MsgChatTransferClient.Push(&mq.MsgChatTransfer{
 				ConversationId: data.ConversationId,
 				ChatType:       data.ChatType,
 				SendId:         conn.Uid,
 				RecvId:         data.RecvId,
-				SendTime:       time.Now().UnixMilli(),
-				Msg:            data.Msg,
-			}), data.RecvId)
+				SendTime:       time.Now().UnixNano(),
+				MType:          data.Msg.MType,
+				Content:        data.Msg.Content,
+			})
+			if err != nil {
+				srv.Send(websocket.NewErrMessage(err), conn)
+				return
+			}
 		}
 	}
 }
