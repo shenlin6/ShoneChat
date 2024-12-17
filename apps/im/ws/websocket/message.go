@@ -1,5 +1,7 @@
 package websocket
 
+import "time"
+
 type FrameType uint8
 
 const (
@@ -12,9 +14,14 @@ const (
 
 type Message struct {
 	FrameType `json:"frameType"`
-	Method    string      `json:"method"`
-	FormId    string      `json:"formId"`
-	Data      interface{} `json:"data"` // map[string]interface{}
+	Id        string    `json:"id"`
+	AckSeq    int       `json:"ackSeq"`
+	ackTime   time.Time `json:"ackTime"`
+	errCount  int       `json:"errCount"`
+
+	Method string      `json:"method"`
+	FormId string      `json:"formId"`
+	Data   interface{} `json:"data"` // map[string]interface{}
 }
 
 func NewMessage(formId string, data interface{}) *Message {
