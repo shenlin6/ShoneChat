@@ -2,54 +2,59 @@ package msgTransfer
 
 import (
 	"ShoneChat/apps/im/immodels"
-	"ShoneChat/apps/im/ws/websocket"
+	"ShoneChat/apps/im/ws/ws"
 	"ShoneChat/apps/task/mq/internal/svc"
 	"ShoneChat/apps/task/mq/mq"
-	"ShoneChat/pkg/constant"
+	"ShoneChat/pkg/bitmap"
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/zeromicro/go-zero/core/logx"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MsgChatTransfer struct {
-	logx.Logger
-	svc *svc.ServiceContext
+	*baseMsgTransfer
 }
 
 func NewMsgChatTransfer(svc *svc.ServiceContext) *MsgChatTransfer {
 	return &MsgChatTransfer{
-		Logger: logx.WithContext(context.Background()),
-		svc:    svc,
+		NewBaseMsgTransfer(svc),
 	}
 }
 
-func (m *MsgChatTransfer) Consume(ctx context.Context, key, value string) error {
+func (m *MsgChatTransfer) Consume(key, value string) error {
 	fmt.Println("key : ", key, " value : ", value)
 	var (
-		data mq.MsgChatTransfer
+		data  mq.MsgChatTransfer
+		ctx   = context.Background()
+		msgId = primitive.NewObjectID()
 	)
 	if err := json.Unmarshal([]byte(value), &data); err != nil {
 		return err
 	}
 
 	// 记录数据
-	if err := m.addChatLog(ctx, &data); err != nil {
+	if err := m.addChatLog(ctx, msgId, &data); err != nil {
 		return err
 	}
 
-	// 推送消息
-	return m.svc.WsClient.Send(websocket.Message{
-		FrameType: websocket.FrameData,
-		Method:    "push",
-		FormId:    constant.SYSTEM_ROOT_UID,
-		Data:      data,
+	return m.Transfer(ctx, &ws.Push{
+		ConversationId: data.ConversationId,
+		ChatType:       data.ChatType,
+		SendId:         data.SendId,
+		RecvId:         data.RecvId,
+		RecvIds:        data.RecvIds,
+		SendTime:       data.SendTime,
+		MType:          data.MType,
+		MsgId:          msgId.Hex(),
+		Content:        data.Content,
 	})
 }
 
-func (m *MsgChatTransfer) addChatLog(ctx context.Context, data *mq.MsgChatTransfer) error {
+func (m *MsgChatTransfer) addChatLog(ctx context.Context, msgId primitive.ObjectID, data *mq.MsgChatTransfer) error {
 	// 记录消息
 	chatLog := immodels.ChatLog{
+		ID:             msgId,
 		ConversationId: data.ConversationId,
 		SendId:         data.SendId,
 		RecvId:         data.RecvId,
@@ -60,10 +65,16 @@ func (m *MsgChatTransfer) addChatLog(ctx context.Context, data *mq.MsgChatTransf
 		SendTime:       data.SendTime,
 	}
 
-	err := m.svc.ChatLogModel.Insert(ctx, &chatLog)
+	// 设置为已读消息
+	readRecords := bitmap.NewBitmap(0)
+	readRecords.Set(chatLog.SendId)
+	chatLog.ReadRecords = readRecords.Export()
+
+	err := m.svcCtx.ChatLogModel.Insert(ctx, &chatLog)
 	if err != nil {
 		return err
 	}
-	// 更新会话
-	return m.svc.ConversationModel.UpdateMsg(ctx, &chatLog)
+
+	return m.svcCtx.ConversationModel.UpdateMsg(ctx, &chatLog)
+
 }

@@ -11,6 +11,8 @@ type Config struct {
 	SocialRpc zrpc.RpcClientConf
 	UserRpc   zrpc.RpcClientConf
 
+	ImRpc zrpc.RpcClientConf
+
 	JwtAuth struct {
 		AccessSecret string
 		//AccessExpire int64

@@ -2,14 +2,15 @@ package bitmap
 
 type Bitmap struct {
 	bits []byte
-	size int
+	size int //总 bit 数量
 }
 
 func NewBitmap(size int) *Bitmap {
+	//设置默认值
 	if size == 0 {
 		size = 250
 	}
-	// [0,0,0,0,1,0,0,0] [0,0,0,0,0,0,0,0]
+
 	return &Bitmap{
 		bits: make([]byte, size),
 		size: size * 8,
@@ -17,11 +18,11 @@ func NewBitmap(size int) *Bitmap {
 }
 
 func (b *Bitmap) Set(id string) {
-	// id在那个bit
+	// id在哪个bit
 	idx := hash(id) % b.size
-	// 计算在那个byte
+	// 计算在哪个byte
 	byteIdx := idx / 8
-	// 在这个byte中的那个bit位置
+	// 在这个byte中的哪个bit位置
 	bitIdx := idx % 8
 
 	b.bits[byteIdx] |= 1 << bitIdx

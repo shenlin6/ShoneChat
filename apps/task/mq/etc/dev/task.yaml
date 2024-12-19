@@ -10,14 +10,34 @@ MsgChatTransfer:
   Offset: first
   Consumers: 1
 
+MsgReadTransfer:
+  Name: MsgReadTransfer
+  Brokers:
+    - 192.168.117.24:9092
+  Group: kafka
+  Topic: msgReadTransfer
+  Offset: first
+  Consumers: 1
+
+MsgReadHandler:
+  GroupMsgReadHandler: 1
+  GroupMsgReadRecordDelayTime: 2
+  GroupMsgReadRecordDelayCount: 2
+
 Redisx:
   Host: 192.168.117.24:16379
   Type: node
-  Pass: easy-chat
+  Pass: shonechat
 
 Mongo:
-  Url: "mongodb://root:easy-chat@192.168.117.24:47017"
-  Db: easy-chat
+  Url: "mongodb://root:shonechat@192.168.117.24:47017"
+  Db: shonechat
+
+SocialRpc:
+  Etcd:
+    Hosts:
+      - 192.168.117.24:3379
+    Key: social.rpc
 
 Ws:
   Host: 127.0.0.1:10090

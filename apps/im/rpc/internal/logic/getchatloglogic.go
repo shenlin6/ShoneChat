@@ -43,6 +43,7 @@ func (l *GetChatLogLogic) GetChatLog(in *im.GetChatLogReq) (*im.GetChatLogResp, 
 				MsgContent:     chatlog.MsgContent,
 				ChatType:       int32(chatlog.ChatType),
 				SendTime:       chatlog.SendTime,
+				ReadRecords:    chatlog.ReadRecords,
 			}},
 		}, nil
 	}
@@ -51,7 +52,9 @@ func (l *GetChatLogLogic) GetChatLog(in *im.GetChatLogReq) (*im.GetChatLogResp, 
 	if err != nil {
 		return nil, errors.Wrapf(xerr.NewDBErr(), "find chatLog by msgId err %v, req %v", err, in.MsgId)
 	}
+
 	res := make([]*im.ChatLog, 0, len(data))
+	
 	for _, d := range data {
 		res = append(res, &im.ChatLog{
 			Id:             d.ID.Hex(),
@@ -62,6 +65,7 @@ func (l *GetChatLogLogic) GetChatLog(in *im.GetChatLogReq) (*im.GetChatLogResp, 
 			MsgContent:     d.MsgContent,
 			ChatType:       int32(d.ChatType),
 			SendTime:       d.SendTime,
+			ReadRecords:    d.ReadRecords,
 		})
 	}
 

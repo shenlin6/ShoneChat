@@ -75,5 +75,11 @@ func (l *GroupPutInHandleLogic) GroupPutInHandle(in *social.GroupPutInHandleReq)
 		return nil
 	})
 
-	return &social.GroupPutInHandleResp{}, err
+	if constant.HandlerResult(groupReq.HandleResult.Int64) != constant.PassHandlerResult {
+		return &social.GroupPutInHandleResp{}, err
+	}
+
+	return &social.GroupPutInHandleResp{
+		GroupId: groupReq.GroupId,
+	}, err
 }

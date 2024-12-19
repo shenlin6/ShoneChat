@@ -1,6 +1,7 @@
 package group
 
 import (
+	"ShoneChat/apps/im/rpc/imclient"
 	"ShoneChat/apps/social/rpc/socialclient"
 	"ShoneChat/pkg/ctxdata"
 	"context"
@@ -26,11 +27,10 @@ func NewCreateGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 }
 
 func (l *CreateGroupLogic) CreateGroup(req *types.GroupCreateReq) (resp *types.GroupCreateResp, err error) {
-	// todo: add your logic here and delete this line
 	uid := ctxdata.GetUId(l.ctx)
 
 	// 创建群
-	_, err = l.svcCtx.Social.GroupCreate(l.ctx, &socialclient.GroupCreateReq{
+	res, err := l.svcCtx.Social.GroupCreate(l.ctx, &socialclient.GroupCreateReq{
 		Name:       req.Name,
 		Icon:       req.Icon,
 		CreatorUid: uid,
@@ -38,6 +38,16 @@ func (l *CreateGroupLogic) CreateGroup(req *types.GroupCreateReq) (resp *types.G
 	if err != nil {
 		return nil, err
 	}
+
+	if res.Id == "" {
+		return nil, err
+	}
+
+	// 建立会话
+	_, err = l.svcCtx.Im.CreateGroupConversation(l.ctx, &imclient.CreateGroupConversationReq{
+		GroupId:  res.Id,
+		CreateId: uid,
+	})
 
 	return
 }

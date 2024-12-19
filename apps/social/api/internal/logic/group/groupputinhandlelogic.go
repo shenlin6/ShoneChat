@@ -1,6 +1,7 @@
 package group
 
 import (
+	"ShoneChat/apps/im/rpc/imclient"
 	"ShoneChat/apps/social/rpc/socialclient"
 	"ShoneChat/pkg/constant"
 	"context"
@@ -28,12 +29,11 @@ func NewGroupPutInHandleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *GroupPutInHandleLogic) GroupPutInHandle(req *types.GroupPutInHandleRep) (resp *types.GroupPutInHandleResp, err error) {
-	// todo: add your logic here and delete this line
-
-	_, err = l.svcCtx.Social.GroupPutInHandle(l.ctx, &socialclient.GroupPutInHandleReq{
+	uid := ctxdata.GetUId(l.ctx)
+	res, err := l.svcCtx.Social.GroupPutInHandle(l.ctx, &socialclient.GroupPutInHandleReq{
 		GroupReqId:   req.GroupReqId,
 		GroupId:      req.GroupId,
-		HandleUid:    ctxdata.GetUId(l.ctx),
+		HandleUid:    uid,
 		HandleResult: req.HandleResult,
 	})
 
@@ -41,7 +41,15 @@ func (l *GroupPutInHandleLogic) GroupPutInHandle(req *types.GroupPutInHandleRep)
 		return
 	}
 
-	// todo: 通过后的业务
+	if res.GroupId == "" {
+		return nil, err
+	}
 
-	return
+	_, err = l.svcCtx.Im.SetUpUserConversation(l.ctx, &imclient.SetUpUserConversationReq{
+		SendId:   uid,
+		RecvId:   res.GroupId,
+		ChatType: int32(constant.GroupChatType),
+	})
+
+	return nil, err
 }
