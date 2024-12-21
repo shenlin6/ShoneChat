@@ -28,7 +28,7 @@ func NewGroupPutInHandleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 	}
 }
 
-func (l *GroupPutInHandleLogic) GroupPutInHandle(req *types.GroupPutInHandleRep) (resp *types.GroupPutInHandleResp, err error) {
+func (l *GroupPutInHandleLogic) GroupPutInHandle(req *types.GroupPutInHandleRep) error {
 	uid := ctxdata.GetUId(l.ctx)
 	res, err := l.svcCtx.Social.GroupPutInHandle(l.ctx, &socialclient.GroupPutInHandleReq{
 		GroupReqId:   req.GroupReqId,
@@ -38,11 +38,11 @@ func (l *GroupPutInHandleLogic) GroupPutInHandle(req *types.GroupPutInHandleRep)
 	})
 
 	if constant.HandlerResult(req.HandleResult) != constant.PassHandlerResult {
-		return
+		return err
 	}
 
 	if res.GroupId == "" {
-		return nil, err
+		return err
 	}
 
 	_, err = l.svcCtx.Im.SetUpUserConversation(l.ctx, &imclient.SetUpUserConversationReq{
@@ -51,5 +51,5 @@ func (l *GroupPutInHandleLogic) GroupPutInHandle(req *types.GroupPutInHandleRep)
 		ChatType: int32(constant.GroupChatType),
 	})
 
-	return nil, err
+	return err
 }

@@ -25,9 +25,7 @@ func NewFriendPutInHandleLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *FriendPutInHandleLogic) FriendPutInHandle(req *types.FriendPutInHandleReq) (resp *types.FriendPutInHandleResp, err error) {
-	// todo: add your logic here and delete this line
-
+func (l *FriendPutInHandleLogic) FriendPutInHandle(req *types.FriendPutInHandleReq) (err error) {
 	_, err = l.svcCtx.Social.FriendPutInHandle(l.ctx, &socialclient.FriendPutInHandleReq{
 		FriendReqId:  req.FriendReqId,
 		UserId:       ctxdata.GetUId(l.ctx),

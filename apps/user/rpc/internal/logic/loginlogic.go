@@ -34,7 +34,6 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 }
 
 func (l *LoginLogic) Login(in *user.LoginReq) (*user.LoginResp, error) {
-	// todo: add your logic here and delete this line
 	// 1. 验证用户是否注册，根据手机号码验证
 	userEntity, err := l.svcCtx.UsersModel.FindByPhone(l.ctx, in.Phone)
 	if err != nil {
@@ -58,6 +57,7 @@ func (l *LoginLogic) Login(in *user.LoginReq) (*user.LoginResp, error) {
 	}
 
 	return &user.LoginResp{
+		Id:     userEntity.Id,
 		Token:  token,
 		Expire: now + l.svcCtx.Config.Jwt.AccessExpire,
 	}, nil

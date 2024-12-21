@@ -26,8 +26,6 @@ func NewGroupUserListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Gro
 }
 
 func (l *GroupUserListLogic) GroupUserList(req *types.GroupUserListReq) (resp *types.GroupUserListResp, err error) {
-	// todo: add your logic here and delete this line
-
 	groupUsers, err := l.svcCtx.Social.GroupUsers(l.ctx, &socialclient.GroupUsersReq{
 		GroupId: req.GroupId,
 	})

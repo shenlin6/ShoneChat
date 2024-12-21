@@ -26,9 +26,7 @@ func NewFriendListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Friend
 	}
 }
 
-func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.FriendListResp, err error) {
-	// todo: add your logic here and delete this line
-
+func (l *FriendListLogic) FriendList() (resp *types.FriendListResp, err error) {
 	uid := ctxdata.GetUId(l.ctx)
 
 	friends, err := l.svcCtx.Social.FriendList(l.ctx, &socialclient.FriendListReq{

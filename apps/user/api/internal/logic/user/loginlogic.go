@@ -2,8 +2,8 @@ package user
 
 import (
 	"ShoneChat/apps/user/rpc/user"
+	"ShoneChat/pkg/constant"
 	"context"
-	"fmt"
 	"github.com/jinzhu/copier"
 
 	"ShoneChat/apps/user/api/internal/svc"
@@ -35,9 +35,12 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginResp, err erro
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("login")
+
 	var res types.LoginResp
 	copier.Copy(&res, loginResp)
+
+	// 处理登入的业务
+	l.svcCtx.Redis.HsetCtx(l.ctx, constant.REDIS_ONLINE_USER, loginResp.Id, "1")
 
 	return &res, nil
 }

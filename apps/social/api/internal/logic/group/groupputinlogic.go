@@ -27,7 +27,7 @@ func NewGroupPutInLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupP
 	}
 }
 
-func (l *GroupPutInLogic) GroupPutIn(req *types.GroupPutInRep) (resp *types.GroupPutInResp, err error) {
+func (l *GroupPutInLogic) GroupPutIn(req *types.GroupPutInRep) error {
 
 	uid := ctxdata.GetUId(l.ctx)
 
@@ -40,7 +40,7 @@ func (l *GroupPutInLogic) GroupPutIn(req *types.GroupPutInRep) (resp *types.Grou
 	})
 
 	if res.GroupId == "" {
-		return nil, err
+		return err
 	}
 
 	//建立会话
@@ -50,5 +50,5 @@ func (l *GroupPutInLogic) GroupPutIn(req *types.GroupPutInRep) (resp *types.Grou
 		ChatType: int32(constant.GroupChatType),
 	})
 
-	return nil, err
+	return err
 }

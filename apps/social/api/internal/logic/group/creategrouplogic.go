@@ -26,7 +26,7 @@ func NewCreateGroupLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 	}
 }
 
-func (l *CreateGroupLogic) CreateGroup(req *types.GroupCreateReq) (resp *types.GroupCreateResp, err error) {
+func (l *CreateGroupLogic) CreateGroup(req *types.GroupCreateReq) error {
 	uid := ctxdata.GetUId(l.ctx)
 
 	// 创建群
@@ -36,11 +36,11 @@ func (l *CreateGroupLogic) CreateGroup(req *types.GroupCreateReq) (resp *types.G
 		CreatorUid: uid,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if res.Id == "" {
-		return nil, err
+		return err
 	}
 
 	// 建立会话
@@ -49,5 +49,5 @@ func (l *CreateGroupLogic) CreateGroup(req *types.GroupCreateReq) (resp *types.G
 		CreateId: uid,
 	})
 
-	return
+	return err
 }
