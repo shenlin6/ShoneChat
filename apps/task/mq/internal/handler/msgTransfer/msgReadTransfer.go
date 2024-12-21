@@ -58,12 +58,11 @@ func NewMsgReadTransfer(svc *svc.ServiceContext) kq.ConsumeHandler {
 	return m
 }
 
-func (m *MsgReadTransfer) Consume(key, value string) error {
+func (m *MsgReadTransfer) Consume(ctx context.Context, key, value string) error {
 	m.Info("MsgReadTransfer ", value)
 
 	var (
 		data mq.MsgMarkRead
-		ctx  = context.Background()
 	)
 	if err := json.Unmarshal([]byte(value), &data); err != nil {
 		return err

@@ -65,7 +65,6 @@ func (m *MsgChatTransfer) addChatLog(ctx context.Context, msgId primitive.Object
 		SendTime:       data.SendTime,
 	}
 
-	// 设置为已读消息
 	readRecords := bitmap.NewBitmap(0)
 	readRecords.Set(chatLog.SendId)
 	chatLog.ReadRecords = readRecords.Export()
@@ -76,5 +75,4 @@ func (m *MsgChatTransfer) addChatLog(ctx context.Context, msgId primitive.Object
 	}
 
 	return m.svcCtx.ConversationModel.UpdateMsg(ctx, &chatLog)
-
 }
